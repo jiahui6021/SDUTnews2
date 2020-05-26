@@ -1,0 +1,2 @@
+rootProject.name='SDUTnews2'
+include ':app'

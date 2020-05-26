@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">SDUTnews2</string>
+    <string name="setting">设置</string>
+    <string name="nav_header_desc">by_行走的二叉树</string>
+    <string name="nav_header_title">by_行走的二叉树</string>
+    <string name="nav_header_subtitle">mail@jhcloud.top</string>
+
+    <string name="menu_newsa">理工要闻</string>
+    <string name="menu_newsb">综合新闻</string>
+    <string name="menu_newsc">院部传真</string>
+    <string name="menu_newsd">教学科研</string>
+    <string name="navigation_drawer_open">Drawer Open</string>
+    <string name="navigation_drawer_close">Drawer Closed</string>
+</resources>

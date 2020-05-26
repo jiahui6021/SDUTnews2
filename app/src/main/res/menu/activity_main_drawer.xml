@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_save"
+            android:icon="@android:drawable/ic_menu_save"
+            android:title="收藏夹"/>
+    </group>
+    <item android:title="新闻">
+        <menu>
+            <item
+                android:id="@+id/nav_newsa"
+                android:icon="@drawable/ic_menu_camera"
+                android:title="@string/menu_newsa" />
+            <item
+                android:id="@+id/nav_newsb"
+                android:icon="@drawable/ic_menu_camera"
+                android:title="@string/menu_newsb" />
+            <item
+                android:id="@+id/nav_newsc"
+                android:icon="@drawable/ic_menu_camera"
+                android:title="@string/menu_newsc" />
+            <item
+                android:id="@+id/nav_newsd"
+                android:icon="@drawable/ic_menu_camera"
+                android:title="@string/menu_newsd" />
+        </menu>
+    </item>
+</menu>
