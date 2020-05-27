@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/refresh">
-        <com.scwang.smartrefresh.header.CircleRefreshHeader
+        <com.scwang.smartrefresh.header.DropBoxHeader
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     <androidx.recyclerview.widget.RecyclerView

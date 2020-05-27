@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!-- "Mark Favorite", should appear as action button if possible -->
+    <item
+        android:id="@+id/news_favorite"
+        android:icon="@drawable/btn_star_off"
+        android:title="收藏"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/news_share"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="分享"
+        app:showAsAction="ifRoom"/>
+</menu>
