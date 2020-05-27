@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
     private int nowop;
     private int page;
     private RefreshLayout refreshLayout;
+    Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         //refresh
         refreshLayout = (RefreshLayout)findViewById(R.id.refresh);
         refreshLayout.setEnableAutoLoadMore(false);
+        refreshLayout.autoRefresh();
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(@NonNull RefreshLayout refreshLayout) {
@@ -76,7 +78,7 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         });
 
         //toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         //navigation
@@ -147,6 +149,8 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         int id = item.getItemId();
         Log.d("MainActivity", "onNavigationItemSelected: "+id);
         page = 1;
+        adapter.clear();
+        refreshLayout.autoRefresh();
         switch (id){
             case R.id.nav_newsa:
                 getdata(0);
@@ -169,6 +173,7 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
                 nowop=4;
                 break;
         }
+        refreshsubtitle();
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -196,6 +201,26 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+        }
+    }
+
+    void refreshsubtitle(){
+        switch (nowop){
+            case 0:
+                toolbar.setSubtitle("理工要闻");
+                break;
+            case 1:
+                toolbar.setSubtitle("综合新闻");
+                break;
+            case 2:
+                toolbar.setSubtitle("院部传真");
+                break;
+            case 3:
+                toolbar.setSubtitle("教学科研");
+                break;
+            case 4:
+                toolbar.setSubtitle("收藏夹");
+                break;
         }
     }
 
@@ -227,6 +252,7 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
                 adapter.add(result);
                 refreshLayout.finishRefresh();
                 refreshLayout.finishLoadMore();
+                refreshsubtitle();
             }
         }
     }
