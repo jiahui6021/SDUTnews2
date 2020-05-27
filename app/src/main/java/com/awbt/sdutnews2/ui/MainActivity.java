@@ -10,11 +10,14 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.awbt.sdutnews2.Adapter.NewsAdapter;
@@ -23,8 +26,10 @@ import com.awbt.sdutnews2.bean.NewsBean;
 import com.awbt.sdutnews2.util.HtmlUtil;
 import com.google.android.material.navigation.NavigationView;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
-import com.scwang.smartrefresh.layout.listener.OnLoadmoreListener;
+import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+
+import org.litepal.LitePal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,23 +49,29 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //初始化数据库
+        SQLiteDatabase db = LitePal.getDatabase();
         nowop=0;
         page=1;
         //refresh
         refreshLayout = (RefreshLayout)findViewById(R.id.refresh);
-        refreshLayout.setEnableAutoLoadmore(false);
+        refreshLayout.setEnableAutoLoadMore(false);
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(@NonNull RefreshLayout refreshLayout) {
                 page=1;
-                new HtmlTask().execute(nowop,page);
+                getdata(nowop);
             }
         });
-        refreshLayout.setOnLoadmoreListener(new OnLoadmoreListener() {
+        refreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
-            public void onLoadmore(RefreshLayout refreshlayout) {
-                page++;
-                new HtmlTask().execute(nowop,page);
+            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
+                if(nowop == 4)
+                    refreshLayout.finishLoadMore();
+                else{
+                    page++;
+                    new HtmlTask().execute(nowop,page);
+                }
             }
         });
 
@@ -78,7 +89,6 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        htmlUtil = new HtmlUtil();
 
         //recyclerview
         recyclerView=(RecyclerView)findViewById(R.id.recy_news);
@@ -88,33 +98,45 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         adapter=  new NewsAdapter(list);
         recyclerView.setAdapter(adapter);
         new HtmlTask().execute(0,page);
+        adapter.setOnItemClickListener(new NewsAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(RecyclerView parent, View view, int position, NewsBean data) {
+                Intent intent = new Intent(MainActivity.this,NewsActivity.class);
+                intent.putExtra("url",data.getUrl());
+                intent.putExtra("content",data.getContent());
+                intent.putExtra("time",data.getTime());
+                intent.putExtra("title",data.getTitle());
+                startActivity(intent);
+            }
+        });
 
+        htmlUtil = new HtmlUtil();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        Log.d("select item", "onOptionsItemSelected: "+item);
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.nav_newsa) {
-            ;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.main, menu);
+//        return true;
+//    }
+//
+//
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item)
+//    {
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+//        Log.d("select item", "onOptionsItemSelected: "+item);
+//        int id = item.getItemId();
+//
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.nav_newsa) {
+//            ;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
     //侧滑点击后事件
     @SuppressWarnings("StatementWithEmptyBody")
@@ -142,6 +164,10 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
                 getdata(3);
                 nowop=3;
                 break;
+            case R.id.nav_save:
+                getdata(4);
+                nowop=4;
+                break;
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -150,7 +176,15 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
 
     private void getdata(final int op){
         Log.d("getdata", "getdata: "+op);
-        new HtmlTask().execute(op,page);
+        if(op<=3){
+            new HtmlTask().execute(op,page);
+        }
+        else {
+            List<NewsBean> newsBeans = LitePal.findAll(NewsBean.class);
+            adapter.clear();
+            adapter.add(newsBeans);
+            refreshLayout.finishRefresh();
+        }
     }
 
     //返回关闭侧滑
@@ -178,19 +212,22 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            Log.d("htmltask", "doInBackground:error ");
             return null;
         }
         @Override
         protected void onPostExecute(List<NewsBean> result){
+            if(page==1)
+                adapter.clear();
             if(result == null){
                 Toast.makeText(MainActivity.this, "糟糕，加载失败了！", Toast.LENGTH_SHORT).show();
             }
-            //Toast.makeText(context, "加载成功"+result.size(), Toast.LENGTH_SHORT).show();
-            if(page==1)
-                adapter.clear();
-            adapter.add(result);
-            refreshLayout.finishRefresh();
-            refreshLayout.finishLoadmore();
+            else{
+                //Toast.makeText(context, "加载成功"+result.size(), Toast.LENGTH_SHORT).show();
+                adapter.add(result);
+                refreshLayout.finishRefresh();
+                refreshLayout.finishLoadMore();
+            }
         }
     }
 }

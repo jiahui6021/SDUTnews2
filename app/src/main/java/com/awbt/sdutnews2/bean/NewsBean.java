@@ -1,6 +1,8 @@
 package com.awbt.sdutnews2.bean;
 
-public class NewsBean {
+import org.litepal.crud.LitePalSupport;
+
+public class NewsBean extends LitePalSupport {
     private String title;
     private String time;
     private String content;
